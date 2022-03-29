@@ -1,0 +1,100 @@
+
+---
+title: "Plotly using HTML Widgets in R"
+output:
+  html_document:
+    toc: true
+---
+
+#HTML Widgets in Databricks R Notebooks
+This example notebook shows how to use libraries like Plotly and other libraries such as Leaflet and Dygraphs. To get setup, the user requires [R HTML widgets](http://www.htmlwidgets.org/) working in Databricks notebooks. This setup has two steps:
+1. Installing `pandoc`, a Linux package that is used by HTML widgets to generate HTML
+2. Changing one function within HTML Widgets package to make it seemlessly work in Databricks. Make sure you use correct URL of your Databricks environment.
+
+This notebook shows a Plotly example using HTMLWidgets
+
+```{r}
+%md
+Reference articles: [HTML Widgets in Azure Databricks R Notebooks](https://docs.microsoft.com/en-us/azure/databricks/_static/notebooks/azure/htmlwidgets-azure.html) \
+[HTML Widgets in Databricks R Notebooks](https://docs.databricks.com/_static/notebooks/htmlwidgets.html) \
+[HTML Widgets](https://www.htmlwidgets.org/)
+```
+
+
+```{bash}
+apt-get --yes install pandoc
+```
+
+```{r}
+%md
+The aim of devtools is to make package development easier by providing R functions that simplify and expedite common tasks.
+```
+
+
+```{r}
+require(devtools)
+install_version("htmltools", version = "0.4.0", repos = "http://cran.us.r-project.org")
+```
+
+
+```{r}
+library(htmltools)
+```
+
+
+```{r}
+install.packages("htmlwidgets")
+```
+
+
+```{r}
+library(htmlwidgets)
+```
+
+
+```{r}
+
+## URL of your Azure Databricks Account
+## Replace <region> with the region of your Azure Databricks Account URL
+## Make sure you use HTTPS
+databricksURL <- "<region>/files/rwidgets/"
+
+```
+
+
+```{r}
+install.packages("R.utils")
+```
+
+
+```{r}
+## Fix HTML Widgets package to work in Azure Databricks Notebooks
+## Replace <workspace-id> with the workspace ID of your Azure Databricks Account URL
+db_html_print <- function(x, ..., view = interactive()) {
+  fileName <- paste(tempfile(), ".html", sep="")
+  htmlwidgets::saveWidget(x, file = fileName)
+  
+  randomFileName = paste0(floor(runif(1, 0, 10^12)), ".html")
+  baseDir <- "/dbfs/FileStore/rwidgets/"
+  dir.create(baseDir)
+  internalFile = paste0(baseDir, randomFileName)
+  externalFile = paste0(databricksURL, randomFileName, "?o=<workspace-id>")
+  system(paste("cp", fileName, internalFile))
+  displayHTML(externalFile)
+}
+R.utils::reassignInPackage("print.htmlwidget", pkgName = "htmlwidgets", value = db_html_print)
+```
+
+# Example with `plotly`
+
+```{r}
+install.packages("plotly")
+```
+
+
+```{r}
+library(plotly)
+p <- plot_ly(midwest, x = ~percollege, color = ~state, type = "box")
+p
+```
+
