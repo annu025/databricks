@@ -1,0 +1,81 @@
+
+---
+title: "Visualizations in SparkR"
+output:
+  html_document:
+    toc: true
+---
+
+
+```{r}
+%md
+Reference article: https://docs.databricks.com/notebooks/visualizations/index.html 
+```
+
+
+```{r}
+%md
+What is SparkR?
+SparkR is an R package that provides a light-weight frontend to use Apache Spark from R. 
+```
+
+
+```{r}
+%md
+To use SparkR, use the `library(SparkR)` in the Databricks notebooks. 
+The SparkR session is already configured, and all SparkR functions will talk to the attached cluster using the existing session.
+
+```
+
+
+```{r}
+# To plot data in R, use the display function as follows
+library(SparkR)
+diamonds_df <- read.df("/databricks-datasets/Rdatasets/data-001/csv/ggplot2/diamonds.csv", source = "csv", header="true", inferSchema = "true")
+
+display(arrange(agg(groupBy(diamonds_df, "color"), "price" = "avg"), "color"))
+```
+
+
+```{r}
+# user can use the default R plot function
+fit <- lm(Petal.Length ~., data = iris)
+layout(matrix(c(1,2,3,4),2,2)) # optional 4 graphs/page
+plot(fit)
+```
+
+
+```{r}
+%md
+SparkR supports various R packages like Lattice, Plotly, DandEFA, ggplots. Below example illustrates the use of ggplots
+
+```
+
+
+```{r}
+library(ggplot2)
+ggplot(diamonds, aes(carat, price, color = color, group = 1)) + geom_point(alpha = 0.3) + stat_smooth()
+```
+
+
+```{r}
+ggplot(mpg, aes(displ, hwy, colour = class)) + geom_point()
+```
+
+
+```{r}
+%md
+#### Visualizations in SQL
+```
+
+
+```{r}
+%sql
+SELECT color, avg(price) AS price FROM diamonds GROUP BY color ORDER BY COLOR
+```
+
+
+```{r}
+
+```
+
