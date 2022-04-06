@@ -1,2 +1,2 @@
-Examples using R in Databricks notebooks are in sparkr directory.
+Examples using R in Databricks notebooks are in `sparkr` directory.
 
